@@ -106,6 +106,32 @@ pub enum ExrCompression {
     Piz,
 }
 
+/// Pixel format written for [`crate::Format::Dds`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum DdsFormat {
+    /// BC1: 4 bits per pixel, opaque or 1-bit alpha.
+    Dxt1,
+    /// BC2: 8 bits per pixel, sharp 4-bit alpha.
+    Dxt3,
+    /// BC3: 8 bits per pixel, smooth alpha.
+    #[default]
+    Dxt5,
+    /// BC4 (ATI1): single channel, taken from red.
+    Bc4,
+    /// BC5 (ATI2): two channels, taken from red and green (normal maps).
+    Bc5,
+    /// Uncompressed A8R8G8B8.
+    Argb8,
+    /// Uncompressed X8R8G8B8.
+    Xrgb8,
+    /// Uncompressed R8G8B8.
+    Rgb8,
+    /// Uncompressed 8-bit luminance.
+    L8,
+    /// Uncompressed 8-bit alpha only.
+    A8,
+}
+
 /// Options for [`crate::encode`].
 #[derive(Debug, Clone)]
 pub struct EncodeOptions {
@@ -126,6 +152,12 @@ pub struct EncodeOptions {
     /// only when it could pass the 4 GiB a classic TIFF can address.
     pub tiff_bigtiff: bool,
     pub exr_compression: ExrCompression,
+    /// DDS: pixel format to write.
+    pub dds_format: DdsFormat,
+    /// DDS: write a full mip chain (alpha-weighted box filter).
+    pub dds_mipmaps: bool,
+    /// DDS: keep alpha as opacity (`false` writes a fully opaque texture).
+    pub dds_alpha: bool,
     /// Embed the ICC profile when the format supports it.
     pub embed_icc: bool,
     /// Embed EXIF/XMP/DPI/text when the format supports it.
@@ -144,6 +176,9 @@ impl Default for EncodeOptions {
             tiff_compression: TiffCompression::Deflate,
             tiff_bigtiff: false,
             exr_compression: ExrCompression::Zip16,
+            dds_format: DdsFormat::Dxt5,
+            dds_mipmaps: false,
+            dds_alpha: true,
             embed_icc: true,
             embed_metadata: true,
         }

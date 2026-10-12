@@ -59,6 +59,7 @@ fn default_build_formats_all_symmetric() {
         Format::OpenExr,
         Format::Hdr,
         Format::Fits,
+        Format::Dds,
     ];
     for f in expected {
         assert!(caps(f).read && caps(f).write, "{f:?}");
@@ -175,6 +176,10 @@ fn detect_magic_pnm_family() {
 #[test]
 fn detect_magic_qoi() {
     assert_eq!(detect(b"qoif\0\0\0\x01\0\0\0\x01\x03\0"), Some(Format::Qoi));
+}
+#[test]
+fn detect_magic_dds() {
+    assert_eq!(detect(b"DDS \x7c\0\0\0"), Some(Format::Dds));
 }
 #[test]
 fn detect_magic_exr() {
