@@ -1,3 +1,4 @@
+pub(crate) mod dds;
 pub(crate) mod deep_exr;
 pub(crate) mod exr;
 pub(crate) mod exr_cryptomatte;

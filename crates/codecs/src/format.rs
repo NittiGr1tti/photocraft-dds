@@ -25,6 +25,9 @@ pub enum Format {
     Heif,
     /// FITS (Flexible Image Transport System), the astronomy format: gray or RGB image data.
     Fits,
+    /// DirectDraw Surface (game textures): BC1–BC5 block compression and uncompressed pixels,
+    /// with optional mip-maps on write; the top mip level on read.
+    Dds,
 }
 
 /// What a format can hold **and** what this crate reads/writes for it.
@@ -78,7 +81,7 @@ const ALL_LAYOUTS: &[ChannelLayout] = &[L::Gray, L::GrayA, L::Rgb, L::Rgba, L::C
 
 impl Format {
     /// Every format known to the crate (enabled or not).
-    pub const ALL: [Format; 15] = [
+    pub const ALL: [Format; 16] = [
         Format::Png,
         Format::Jpeg,
         Format::Tiff,
@@ -94,6 +97,7 @@ impl Format {
         Format::Avif,
         Format::Heif,
         Format::Fits,
+        Format::Dds,
     ];
 
     pub fn caps(self) -> FormatCaps {
@@ -123,6 +127,7 @@ impl Format {
             Format::Avif => "AVIF",
             Format::Heif => "HEIF",
             Format::Fits => "FITS",
+            Format::Dds => "DirectDraw Surface",
         }
     }
 
@@ -145,6 +150,7 @@ impl Format {
             Format::Avif => &["avif"],
             Format::Heif => &["heic", "heif", "hif"],
             Format::Fits => &["fits", "fit", "fts"],
+            Format::Dds => &["dds"],
         }
     }
 
@@ -165,6 +171,7 @@ impl Format {
             Format::Avif => "image/avif",
             Format::Heif => "image/heif",
             Format::Fits => "image/fits",
+            Format::Dds => "image/vnd-ms.dds",
         }
     }
 
@@ -215,6 +222,7 @@ pub fn caps(format: Format) -> FormatCaps {
             FormatCaps { read: cfg!(feature = "heif"), write: false, depths: &[S::U8, S::U16], icc: true, exif: true, xmp: true, lossy: true, ..base }
         }
         Format::Fits => FormatCaps { depths: &[S::U8, S::U16, S::F32], layouts: &[L::Gray, L::Rgb], alpha: false, text: true, ..base },
+        Format::Dds => FormatCaps { layouts: &[L::Rgba], lossy: true, ..base },
     }
 }
 
@@ -239,6 +247,9 @@ pub fn detect(bytes: &[u8]) -> Option<Format> {
     }
     if b.starts_with(b"qoif") {
         return Some(Format::Qoi);
+    }
+    if b.starts_with(b"DDS ") {
+        return Some(Format::Dds);
     }
     if b.starts_with(&[0x76, 0x2F, 0x31, 0x01]) {
         return Some(Format::OpenExr);
